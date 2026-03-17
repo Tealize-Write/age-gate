@@ -347,22 +347,55 @@
   </div>
 
   <script>
-    const DEST_URL = 'https://myship.7-11.com.tw/general/detail/GM2411116895050';
+    const DEST_URL   = 'https://myship.7-11.com.tw/general/detail/GM2411116895050';
+    const GAS_URL    = 'https://script.google.com/macros/s/AKfycbyykxHDqhrTtg9eUe0Yuoyf25dM9MtGYZ4Alom7gf9KxJzmcBaXTHzqbizKfAmrEAGG/exec';
+    const GAS_TOKEN  = 'ujhgoiejhayEUdwodswroigjegpAtiuh0rtuhrathy';
 
+    // ── 工具：產生裝置 ID ──
+    function getClientId() {
+      let cid = localStorage.getItem('agegate_client_id');
+      if (!cid) {
+        cid = 'ag_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        localStorage.setItem('agegate_client_id', cid);
+      }
+      return cid;
+    }
+
+    // ── 工具：偵測 Mobile/Desktop ──
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown';
+
+    // ── 發送追蹤到 GAS（靜默背景，不影響主流程）──
+    function track(action) {
+      fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          token:      GAS_TOKEN,
+          resultCode: 'A_CONTROL_1', // 佔位用，GAS 白名單需要合法 code
+          action:     action,
+          clientId:   getClientId(),
+          source:     new URLSearchParams(window.location.search).get('utm_source') || 'age-gate',
+          referrer:   document.referrer || 'none',
+          device:     isMobile,
+          country:    tz,
+          city:       tz,
+          timeSpent:  0
+        })
+      }).catch(() => {});
+    }
+
+    // ── 按鈕事件 ──
     document.getElementById('btn-confirm').addEventListener('click', function () {
-      // 直接跳轉，瀏覽器歷史不留下這個跳板頁
+      track('click_maihuobian_confirm');
       location.replace(DEST_URL);
     });
 
     document.getElementById('btn-deny').addEventListener('click', function () {
+      track('click_maihuobian_deny');
       document.getElementById('age-modal').style.display = 'none';
       const msg = document.getElementById('age-deny-msg');
       msg.classList.add('show');
-      // 3 秒後關閉 tab（部分瀏覽器允許關閉自己開的 tab）
-      // 如果關不掉就停在溫馨訊息頁
-      setTimeout(function () {
-        window.close();
-      }, 3000);
+      setTimeout(function () { window.close(); }, 3000);
     });
   </script>
 
