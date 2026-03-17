@@ -353,7 +353,9 @@
 
     // ── 工具：產生裝置 ID ──
     function getClientId() {
-      let cid = localStorage.getItem('agegate_client_id');
+  const urlUid = new URLSearchParams(window.location.search).get('uid');
+  if (urlUid) return urlUid;
+  let cid = localStorage.getItem('agegate_client_id');
       if (!cid) {
         cid = 'ag_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
         localStorage.setItem('agegate_client_id', cid);
