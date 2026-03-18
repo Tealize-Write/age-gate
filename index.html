@@ -351,10 +351,20 @@
     const GAS_URL   = 'https://script.google.com/macros/s/AKfycbyykxHDqhrTtg9eUe0Yuoyf25dM9MtGYZ4Alom7gf9KxJzmcBaXTHzqbizKfAmrEAGG/exec';
     const GAS_TOKEN = 'ujhgoiejhayEUdwodswroigjegpAtiuh0rtuhrathy';
 
-    // ── 裝置 ID：優先用心測帶來的 uid，沒有再自己產生 ──
+    // ── 裝置 ID：三層優先順序 ──
+    // 1. URL ?uid= 參數（從心測按鈕帶來）→ 存入 localStorage 供下次使用
+    // 2. localStorage 的 abyss_client_id（曾玩過心測的人）
+    // 3. localStorage 的 agegate_client_id（直接進來的人，自己產生）
     function getClientId() {
       const urlUid = new URLSearchParams(window.location.search).get('uid');
-      if (urlUid) return urlUid;
+      if (urlUid) {
+        localStorage.setItem('agegate_client_id', urlUid); // 存起來，下次直接進也認得出來
+        return urlUid;
+      }
+      // 看看有沒有心測的 id（同一瀏覽器玩過心測）
+      const quizCid = localStorage.getItem('abyss_client_id');
+      if (quizCid) return quizCid;
+      // 都沒有，才自己產生
       let cid = localStorage.getItem('agegate_client_id');
       if (!cid) {
         cid = 'ag_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
