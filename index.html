@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>即將進入《故事另有結局》的賣貨便，請確認是否成年？</title>
 
-  <!-- SEO：不要被搜尋引擎索引，不要顯示在搜尋結果 -->
   <meta name="robots" content="noindex, nofollow"/>
 
-  <!-- 防止被 iframe 嵌入（安全） -->
   <meta http-equiv="X-Frame-Options" content="DENY"/>
 
   <style>
@@ -169,6 +167,31 @@
       text-align: center;
     }
 
+    /* ── 目的地與商品位置系統提示框（取代原本單純的文字） ── */
+    .age-modal-dest-info {
+      margin-top: 20px;
+      padding: 14px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      text-align: center;
+    }
+    .dest-label {
+      font-family: var(--serif);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 6px;
+    }
+    .dest-note {
+      font-family: var(--serif);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.6;
+    }
+
     /* ── 主分隔線 ── */
     .age-modal-rule {
       width: 55%;
@@ -208,7 +231,7 @@
       letter-spacing: 6px;
       color: rgba(255,255,255,0.2);
     }
-
+	
     /* ── 未成年提示 ── */
     .age-deny-msg {
       display: none;
@@ -237,12 +260,10 @@
     }
   </style>
 
-  <!-- Noto Serif TC（跟主網站一致） -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
-  <!-- compass SVG symbol（跟主網站相同） -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <symbol id="compass" viewBox="0 0 220 220" overflow="visible">
@@ -296,7 +317,6 @@
     </defs>
   </svg>
 
-  <!-- ── 年齡驗證彈窗 ── -->
   <div id="age-modal" class="age-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="age-modal-title">
     <div class="age-modal-box">
 
@@ -310,7 +330,7 @@
       </div>
 
       <div class="age-modal-diamond">◆</div>
-      <p class="age-modal-eyebrow">限制級</p>
+      <p class="age-modal-eyebrow">限制級・賣貨便</p>
 
       <div class="age-modal-title-wrap">
         <div class="age-modal-rule-short"></div>
@@ -329,11 +349,16 @@
         </div>
       </div>
 
+      <div class="age-modal-dest-info">
+        <div class="dest-label">確認是否前往：7-11 賣貨便</div>
+        <div class="dest-note">若前往，《故事另有結局》位於賣場內【第 3 項】</div>
+      </div>
+
       <div class="age-modal-rule"></div>
 
       <div class="age-modal-btns">
-        <button class="age-btn" id="btn-confirm">已滿 18 歲，進入賣貨便</button>
         <button class="age-btn" id="btn-deny">尚未成年，先行離開</button>
+        <button class="age-btn" id="btn-confirm">已滿 18 歲，前往賣貨便</button>
       </div>
 
       <div class="age-modal-footer-deco">✦　✦　✦</div>
@@ -341,7 +366,6 @@
     </div>
   </div>
 
-  <!-- ── 未成年提示畫面 ── -->
   <div id="age-deny-msg" class="age-deny-msg">
     <p>✦ 感謝理解<br/>歡迎成年後再來黑森林</p>
   </div>
@@ -352,19 +376,15 @@
     const GAS_TOKEN = 'ujhgoiejhayEUdwodswroigjegpAtiuh0rtuhrathy';
 
     // ── 裝置 ID：三層優先順序 ──
-    // 1. URL ?uid= 參數（從心測按鈕帶來）→ 存入 localStorage 供下次使用
-    // 2. localStorage 的 abyss_client_id（曾玩過心測的人）
-    // 3. localStorage 的 agegate_client_id（直接進來的人，自己產生）
     function getClientId() {
       const urlUid = new URLSearchParams(window.location.search).get('uid');
       if (urlUid) {
-        localStorage.setItem('agegate_client_id', urlUid); // 存起來，下次直接進也認得出來
+        localStorage.setItem('agegate_client_id', urlUid); 
         return urlUid;
       }
-      // 看看有沒有心測的 id（同一瀏覽器玩過心測）
       const quizCid = localStorage.getItem('abyss_client_id');
       if (quizCid) return quizCid;
-      // 都沒有，才自己產生
+      
       let cid = localStorage.getItem('agegate_client_id');
       if (!cid) {
         cid = 'ag_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
@@ -391,7 +411,7 @@
       })
       .catch(() => {});
 
-    // ── 發送追蹤到 GAS（靜默背景，不影響主流程）──
+    // ── 發送追蹤到 GAS ──
     function track(action) {
       fetch(GAS_URL, {
         method: 'POST',
